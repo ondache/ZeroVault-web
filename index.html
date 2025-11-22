@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Zero Vault</title>
+    <style>
+        :root {
+            --bg: #0f1420;
+            --panel: #151b2b;
+            --muted: #8b95b7;
+            --text: #e6ecff;
+            --accent: #5b8cff;
+            --accent-2: #9c6bff;
+            --danger: #ff5b6b;
+            --border: #24314d;
+        }
+        * { box-sizing: border-box; }
+        html, body { height: 100%; }
+        body {
+            margin: 0;
+            font-family: ui-sans-serif, system-ui, Segoe UI, Roboto, Helvetica, Arial, Apple Color Emoji, Segoe UI Emoji;
+            color: var(--text);
+            background: radial-gradient(1200px 1200px at 10% -10%, #1b2440 0%, var(--bg) 40%), var(--bg);
+        }
+        .container {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 12px 0 24px;
+        }
+        .brand {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .brand-badge {
+            width: 36px; height: 36px; border-radius: 10px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            box-shadow: 0 6px 20px rgba(91, 140, 255, .35);
+        }
+        .brand h1 { font-size: 18px; margin: 0; letter-spacing: .3px; }
+
+        .panel {
+            background: rgba(21, 27, 43, .72);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,.35);
+            backdrop-filter: blur(6px);
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 16px;
+        }
+        .col-12 { grid-column: span 12; }
+        .col-6 { grid-column: span 6; }
+        .col-3 { grid-column: span 3; }
+        @media (max-width: 800px) {
+            .col-6, .col-3 { grid-column: span 12; }
+        }
+
+        label { display: block; font-size: 13px; color: var(--muted); margin: 0 0 6px 2px; }
+
+        input[type="text"], input[type="password"], input[type="number"], textarea {
+            width: 100%;
+            background: #0f1629;
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 14px;
+            outline: none;
+            transition: border-color .15s ease, box-shadow .15s ease;
+        }
+        textarea { min-height: 84px; resize: vertical; }
+        input:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(91,140,255,.15); }
+        .hint { color: var(--muted); font-size: 12px; margin-top: 6px; }
+        .mode-chip { margin: 0; }
+        .inline-options { display: flex; gap: 10px; flex-wrap: wrap; }
+        .chip {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: #0f1629; border: 1px solid var(--border);
+            padding: 10px 12px; border-radius: 999px; cursor: pointer;
+            user-select: none; transition: border-color .15s ease, background .15s ease;
+        }
+        .chip input { appearance: none; width: 14px; height: 14px; border: 2px solid var(--muted); border-radius: 50%; display: inline-block; position: relative; }
+        .chip input:checked { border-color: var(--accent); background: radial-gradient(circle at center, var(--accent) 0 50%, transparent 55% 100%); }
+        .chip strong { font-weight: 600; }
+
+        /* Segmented control just for Mode radios */
+        /* Use :has() only when supported. Without support, it falls back to regular chips. */
+        @supports selector(:has(input:checked)) {
+            .mode-group {
+                display: inline-flex;
+                gap: 0; /* segments touch */
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                overflow: hidden;
+                background: #0f1629;
+            }
+            .mode-group .chip {
+                border: none;
+                border-radius: 0;
+                padding: 12px 16px;
+                background: transparent;
+                position: relative;
+                transition: background .15s ease, color .15s ease, box-shadow .15s ease;
+            }
+            .mode-group .chip + .chip { border-left: 1px solid var(--border); }
+            /* Hide the small radio dot inside segmented control but keep it accessible */
+            .mode-group .chip input {
+                position: absolute;
+                inset: 0;
+                width: 100%;
+                height: 100%;
+                opacity: 0;
+                border: 0;
+                margin: 0;
+                cursor: pointer;
+            }
+            .mode-group .chip:hover { background: #121a30; }
+            .mode-group .chip:focus-within { box-shadow: inset 0 0 0 2px rgba(91,140,255,.35); }
+            .mode-group .chip:has(input:checked) {
+                background: linear-gradient(135deg, var(--accent), var(--accent-2));
+                color: #fff;
+            }
+            .mode-group .chip:has(input:checked) .hint { color: #eef3ff; opacity: .9 }
+            .mode-group .chip .hint { margin-top: 0 }
+        }
+    
+        .footer-actions { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+        .btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white; border: 0; padding: 12px 16px; border-radius: 10px; cursor: pointer;
+            font-weight: 600; letter-spacing: .2px; box-shadow: 0 10px 20px rgba(91,140,255,.3);
+        }
+        .btn:disabled { opacity: .6; cursor: not-allowed; box-shadow: none; }
+        .btn-secondary {
+            background: transparent;
+            color: var(--accent);
+            border: 1px solid var(--border);
+            padding: 8px 12px;
+            border-radius: 8px;
+            box-shadow: none;
+        }
+        .seed-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .footer {
+            margin: 24px 0 12px;
+            color: var(--muted);
+            font-size: 12px;
+            text-align: center;
+        }
+    </style>
+    <script src="bip-0039.js"></script>
+    <script defer src="crypto.js"></script>
+    <script defer src="validate.js"></script>
+    <script defer src="main.js"></script>
+</head>
+<body>
+<div class="container">
+    <header>
+        <div class="brand">
+            <div class="brand-badge" aria-hidden="true"></div>
+            <h1>Zero Vault</h1>
+        </div>
+        <div class="hint">Deterministic credentials — derived on demand</div>
+    </header>
+
+    <section class="panel">
+        <form id="vault-form" class="grid" autocomplete="off">
+            <!-- 1. Seed phrase (12 words) -->
+            <div class="col-12">
+                <label for="seed">Seed phrase (12 words)</label>
+                <textarea id="seed" name="seed" placeholder="twelve words separated by spaces" spellcheck="false"></textarea>
+                <div class="seed-actions">
+                    <div class="hint">Use a 12-word BIP39-compatible mnemonic. Words separated by single spaces.</div>
+                    <button type="button" id="gen-mnemonic" class="btn-secondary" aria-label="Generate a new 12-word seed phrase">Generate 12-word mnemonic</button>
+                </div>
+            </div>
+
+            <!-- 2–3. Pass phrase + confirmation (hidden) -->
+            <div class="col-6">
+                <label for="passphrase">Pass phrase</label>
+                <input id="passphrase" name="passphrase" type="password" inputmode="text" autocomplete="new-password" placeholder="Enter pass phrase" />
+            </div>
+            <div class="col-6">
+                <label for="passphraseConfirm">Confirm pass phrase</label>
+                <input id="passphraseConfirm" name="passphraseConfirm" type="password" inputmode="text" autocomplete="new-password" placeholder="Re-enter pass phrase" />
+            </div>
+
+            <!-- 4. Service name -->
+            <div class="col-6">
+                <label for="service">Service name</label>
+                <input id="service" name="service" type="text" placeholder="e.g., github.com" />
+            </div>
+
+            <!-- 5. Year (default to current year) -->
+            <div class="col-3">
+                <label for="year">Year</label>
+                <input id="year" name="year" type="number" min="1970" max="2999" placeholder="YYYY" />
+            </div>
+
+            <!-- 6. Quarter (5 toggles) -->
+            <div class="col-3">
+                <label>Quarter</label>
+                <div class="inline-options" role="radiogroup" aria-label="Quarter">
+                    <label class="chip"><input type="radio" name="quarter" value="q1" /> Q1</label>
+                    <label class="chip"><input type="radio" name="quarter" value="q2" /> Q2</label>
+                    <label class="chip"><input type="radio" name="quarter" value="q3" /> Q3</label>
+                    <label class="chip"><input type="radio" name="quarter" value="q4" /> Q4</label>
+                    <label class="chip"><input type="radio" name="quarter" value="" checked /> leave empty</label>
+                </div>
+            </div>
+
+            <!-- 7. Mode (toggle strong or ultra) -->
+            <div class="col-12">
+                <label>Mode</label>
+                <div class="inline-options mode-group" role="radiogroup" aria-label="Mode">
+                    <label class="chip mode-chip"><input type="radio" name="mode" value="strong" checked /> <strong>Strong</strong> <span class="hint">(24 chars)</span></label>
+                    <label class="chip mode-chip"><input type="radio" name="mode" value="ultra" /> <strong>Ultra</strong> <span class="hint">(120 chars)</span></label>
+                </div>
+            </div>
+
+            <div class="col-12 footer-actions">
+                <div class="hint" id="confirm-hint">Enter seed phrase and passphrase</div>
+                <button type="button" id="generate" class="btn" disabled>Generate</button>
+            </div>
+            <br/>
+            
+            <!-- Generated result output -->
+            <div class="col-12">
+                <label for="result">Generated password</label>
+                <input id="result" name="result" type="text" placeholder="Click Generate to derive password" readonly />
+                <div class="hint">This value is derived on demand in your browser and is not stored.</div>
+            </div>
+        </form>
+    </section>
+    <footer class="footer">Zero Vault v2. Build 21.11.2025</footer>
+</div>
+</body>
+</html>
