@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.html",
   "scripts": {
-
+    "test": "jest"
   },
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "jest": "^30.3.0"
+  }
 }
