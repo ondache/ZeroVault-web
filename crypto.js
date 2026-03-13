@@ -1,10 +1,10 @@
 const MODES = {
-    'strong': {
+    'STRONG': {
         'hash-key-size': 16,
         'password-length': 24,
         'iterations': 1_000_000
     },
-    'ultra': {
+    'ULTRA': {
         'hash-key-size': 88,
         'password-length': 120,
         'iterations': 5_000_000
@@ -96,6 +96,14 @@ async function is_checksum_valid(seed) {
     return BigInt((await sha256Bytes(entropy))[0]) >> 4n === checksum;
 }
 
+
+/**
+ * @param {Uint8Array<ArrayBuffer>} key
+ * @param {Uint8Array<ArrayBuffer>} salt
+ * @param {number} keySize
+ * @param {number} iterations
+ * @returns {Promise<ArrayBuffer>}
+ */
 async function generate_key(key, salt, keySize, iterations){
     const cryptoObj = get_crypto();
     const keyMaterial = await cryptoObj.subtle.importKey(
@@ -106,11 +114,10 @@ async function generate_key(key, salt, keySize, iterations){
         ["deriveBits", "deriveKey"],
     );
 
-    const enc = new TextEncoder();
     return await cryptoObj.subtle.deriveBits(
         {
             name: "PBKDF2",
-            salt: enc.encode(salt),
+            salt: salt,
             iterations: iterations,
             hash: "SHA-512",
         },
@@ -119,26 +126,56 @@ async function generate_key(key, salt, keySize, iterations){
     );
 }
 
-async function generate() {
+/**
+ *
+ * @param {ArrayBuffer} buffer
+ * @returns {string}
+ */
+function humanize(buffer){
+    const binary = String.fromCharCode(...new Uint8Array(buffer));
+    let password = btoa(binary);
+    password = password.replace(/\+/g, '*').replace(/\//g, '_').replace(/=/g, '-');
+    return password;
+}
+
+/**
+ * @param {bigint} seed
+ * @param {string} passphrase
+ * @param {string} service
+ * @param {string} year
+ * @param {string} quarter
+ * @param {string} mode
+ * @param {number|null} key_size_override
+ * @param {number|null} iterations_override
+ * @returns {Promise<string>}
+ */
+async function generate_password(seed, passphrase, service, year, quarter, mode, key_size_override=null, iterations_override=null){
+    const enc = new TextEncoder();
+    const seedBytes = bigintToBytesBE(seed, 17);
+    quarter = quarter === '' ? quarter : `q${quarter}`;
+    const meta = `${service}${year}${quarter}`;
+    const salt = enc.encode((passphrase+meta).padEnd(16, '*'));
+
+    const key_size = key_size_override ?? MODES[mode]['hash-key-size'] * 8;
+    const iterations = iterations_override ?? MODES[mode]['iterations'];
+
+    const derived = await generate_key(seedBytes, salt, key_size, iterations);
+    const password = humanize(derived);
+
+    return password;
+}
+
+async function generate_clicked(){
     const $ = (s) => document.querySelector(s);
 
     const seedPhrase = $('#seed').value.trim().toLocaleLowerCase();
-    const passPhrase = $('#passphrase').value;
-    const year = $('#year').value;
-    // Get selected quarter radio value: "", "q1", "q2", "q3", or "q4"
-    const quarter = $('input[name="quarter"]:checked').value;
+    const passPhrase = $('#passphrase').value.trim();
+    const year = $('#year').value.trim();
+    const quarter = $('input[name="quarter"]:checked').value.trim();
     const mode = $('input[name="mode"]:checked').value;
-    const service = $('#service').value;
+    const service = $('#service').value.trim();
 
-    const seed = bigintToBytesBE(mnemonic_to_integer(seedPhrase), 17);
-    const meta = `${service}${year}${quarter}`;
-    const salt = (passPhrase+meta).padEnd(16, '*');
+    const seedInt = mnemonic_to_integer(seedPhrase);
 
-    const derived = await generate_key(seed, salt, MODES[mode]['hash-key-size'] * 8, MODES[mode]['iterations']);
-
-    const binary = String.fromCharCode(...new Uint8Array(derived));
-    let password = btoa(binary);
-    password = password.replace(/\+/g, '*').replace(/\//g, '_').replace(/=/g, '-');
-
-    return password;
+    return await generate_password(seedInt, passPhrase, service, year, quarter, mode);
 }

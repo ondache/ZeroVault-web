@@ -20,7 +20,7 @@
     if (quarterRadios && quarterRadios.length > 0) {
         const month = now.getMonth(); // 0..11
         const qIndex = Math.floor(month / 3) + 1; // 1..4
-        const targetVal = `q${qIndex}`;
+        const targetVal = `${qIndex}`;
         const target = Array.from(quarterRadios).find(r => r.value === targetVal);
             target.checked = true;
     }
@@ -44,7 +44,7 @@
             try {
                 generateBtn.disabled = true;
                 generateBtn.textContent = 'Generating…';
-                const out = await generate();
+                const out = await generate_clicked();
                 if (resultEl) {
                     resultEl.value = out || '';
                 }
