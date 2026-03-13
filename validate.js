@@ -49,7 +49,7 @@ async function validate() {
     // Year sanity
     if (yearInput && yearInput.value.length > 0) {
         const y = Number(yearInput.value);
-        ok = ok && Number.isInteger(y) && y >= 1970 && y <= 2999;
+        ok = ok && Number.isInteger(y) && y >= 1000 && y <= 9999;
     }
 
     if (generateBtn) generateBtn.disabled = !ok;
