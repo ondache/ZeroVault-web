@@ -139,6 +139,16 @@
             background: linear-gradient(135deg, var(--accent), var(--accent-2));
             color: white; border: 0; padding: 12px 16px; border-radius: 10px; cursor: pointer;
             font-weight: 600; letter-spacing: .2px; box-shadow: 0 10px 20px rgba(91,140,255,.3);
+            transition: transform .1s ease, box-shadow .2s ease, filter .2s ease;
+        }
+        .btn:hover:not(:disabled) {
+            filter: brightness(1.1);
+            box-shadow: 0 12px 24px rgba(91,140,255,.4);
+        }
+        .btn:active:not(:disabled) {
+            transform: translateY(1px);
+            filter: brightness(0.95);
+            box-shadow: 0 5px 10px rgba(91,140,255,.3);
         }
         .btn:disabled { opacity: .6; cursor: not-allowed; box-shadow: none; }
         .btn-secondary {
@@ -148,6 +158,18 @@
             padding: 8px 12px;
             border-radius: 8px;
             box-shadow: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background .2s ease, border-color .2s ease, color .2s ease, transform .1s ease, box-shadow .2s ease;
+        }
+        .btn-secondary:hover {
+            background: rgba(91, 140, 255, .1);
+            border-color: var(--accent);
+            box-shadow: 0 4px 12px rgba(91, 140, 255, .15);
+        }
+        .btn-secondary:active {
+            transform: translateY(1px);
+            background: rgba(91, 140, 255, .2);
         }
         .seed-actions {
             display: flex;
