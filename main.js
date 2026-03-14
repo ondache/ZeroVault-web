@@ -8,6 +8,7 @@
     const quarterRadios = document.querySelectorAll('input[name="quarter"]');
     const generateBtn = $('#generate');
     const genMnemonicBtn = $('#gen-mnemonic');
+    const resultKeyInput = $('#result');
 
     // Default year to current year if empty
     const now = new Date();
@@ -79,5 +80,11 @@
                 try { await validate(); } catch {}
             }
         });
+    }
+
+    if (resultKeyInput){
+        resultKeyInput.addEventListener('click', () => {
+            resultKeyInput.select();
+        })
     }
 })();
