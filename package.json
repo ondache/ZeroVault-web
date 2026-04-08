@@ -2,7 +2,7 @@
   "name": "zerovault",
   "version": "1.0.2",
   "description": "",
-  "main": "index.html",
+  "main": "src/index.html",
   "scripts": {
     "test": "jest"
   },
